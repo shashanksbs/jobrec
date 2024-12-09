@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_file, redirect, url_for
+from flask import Flask, jsonify, send_file
 from flask_cors import CORS
 import PyPDF2
 import os
@@ -17,13 +17,12 @@ def load_json_file(file_name):
 def load_jobs():
     return load_json_file("jobs.json")
 
-def extract_skills_from_pdf(file_path):
+def extract_skills_from_pdf(file):
     skills = []
-    with open(file_path, 'rb') as file:
-        reader = PyPDF2.PdfReader(file)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() + "\n"
+    reader = PyPDF2.PdfReader(file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text() + "\n"
 
     lines = text.splitlines()
     skills_section_found = False
@@ -56,11 +55,6 @@ def render_page(page):
     if page in ['resume', 'learn']:
         return send_file(f'{page}.html')
     return "Page not found", 404
-
-@app.route('/favicon.ico')
-def favicon():
-    # Serve the favicon, return a blank response to avoid the 404 error
-    return redirect(url_for('static', filename='favicon.ico'))
 
 def generate_job_search_url(skills):
     """
@@ -128,11 +122,8 @@ def extract_skills():
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['file']
-    file_path = os.path.join('uploads', file.filename)
-    file.save(file_path)
+    skills_text = extract_skills_from_pdf(file)
 
-    skills_text = extract_skills_from_pdf(file_path)
-    
     extracted_tokens = set()
     for skill in skills_text:
         extracted_tokens.update(tokenize(skill))  
@@ -168,8 +159,6 @@ def extract_skills():
     # Generate job search URL and apply button flag
     job_search_info = generate_job_search_url(skills_text)
 
-    os.remove(file_path)
-
     return jsonify({
         'jobs': recommended_jobs,
         'job_search_url': job_search_info['job_search_url'],
@@ -177,7 +166,4 @@ def extract_skills():
     })
 
 if __name__ == '__main__':
-    if not os.path.exists('uploads'):
-        os.makedirs('uploads')
-        
     app.run(debug=True)
