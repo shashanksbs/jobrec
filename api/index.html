@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Compass - Job Matcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+                <h1 class="text-3xl font-bold text-center">Career Compass</h1>
+                <p class="text-center mt-2">Upload your resume and discover your perfect job match</p>
+            </div>
+            
+            <div class="p-6">
+                <form id="resumeUploadForm" class="space-y-6">
+                    <div class="flex flex-col">
+                        <label for="resumeUpload" class="text-lg font-medium mb-2">Upload Your Resume (PDF)</label>
+                        <input 
+                            type="file" 
+                            id="resumeUpload" 
+                            accept=".pdf" 
+                            class="border-2 border-gray-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                        >
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg text-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition transform hover:scale-105"
+                    >
+                        Analyze Resume & Find Jobs
+                    </button>
+                </form>
+
+                <div id="loadingIndicator" class="hidden text-center mt-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-4 text-lg text-gray-600">Analyzing your resume and finding perfect job matches...</p>
+                </div>
+
+                <div id="jobResults" class="mt-10 hidden">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Your Job Recommendations</h2>
+                    
+                    <div id="googleSearchSection" class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 text-center text-gray-700">Explore More Opportunities</h3>
+                        <div id="googleSearchLink" class="flex justify-center"></div>
+                    </div>
+                    
+                    <div id="jobList" class="space-y-6"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('resumeUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('resumeUpload');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const jobResults = document.getElementById('jobResults');
+            const jobList = document.getElementById('jobList');
+            const googleSearchLink = document.getElementById('googleSearchLink');
+
+            // Reset previous results
+            jobList.innerHTML = '';
+            googleSearchLink.innerHTML = '';
+            
+            // Show loading
+            loadingIndicator.classList.remove('hidden');
+            jobResults.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                // Hide loading
+                loadingIndicator.classList.add('hidden');
+                jobResults.classList.remove('hidden');
+
+                // Populate job recommendations
+                if (data.jobs && data.jobs.length > 0) {
+                    data.jobs.forEach(jobData => {
+                        const job = jobData.job;
+                        const matchPercentage = jobData.match_percentage;
+
+                        const jobCard = document.createElement('div');
+                        jobCard.classList.add('bg-white', 'shadow-md', 'rounded-lg', 'p-6', 'hover:shadow-xl', 'transition');
+                        jobCard.innerHTML = `
+                            <h4 class="text-xl font-bold text-gray-800 mb-2">${job.job_title}</h4>
+                            <p class="text-gray-600 mb-2">${job.company_name}</p>
+                            <div class="flex items-center mb-3">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${matchPercentage}%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 ml-2">${matchPercentage}% Match</span>
+                            </div>
+                            <p class="text-gray-700">${job.job_description.substring(0, 150)}...</p>
+                        `;
+                        jobList.appendChild(jobCard);
+                    });
+                } else {
+                    jobList.innerHTML = '<p class="text-center text-gray-600">No matching jobs found. Try adjusting your resume or search criteria.</p>';
+                }
+
+                // Add Google Search Link
+                if (data.job_search_url) {
+                    const searchLink = document.createElement('a');
+                    searchLink.href = data.job_search_url;
+                    searchLink.target = '_blank';
+                    searchLink.classList.add('inline-block', 'bg-gradient-to-r', 'from-green-400', 'to-blue-500', 'text-white', 'px-6', 'py-3', 'rounded-full', 'font-semibold', 'text-lg', 'hover:from-green-500', 'hover:to-blue-600', 'transition', 'transform', 'hover:scale-105');
+                    searchLink.textContent = data.show_apply_button ? 'Search & Apply for Jobs' : 'Explore More Jobs';
+                    googleSearchLink.appendChild(searchLink);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                loadingIndicator.classList.add('hidden');
+                jobResults.classList.remove('hidden');
+                jobList.innerHTML = '<p class="text-center text-red-500">Error processing resume. Please try again.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

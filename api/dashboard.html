@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechCareer Hub Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.35);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .gradient-border {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+        }
+
+        .icon-container {
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .animated-text {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(1em);
+            transition: all 0.3s ease;
+        }
+
+        .animated-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-white">
+    <div class="container mx-auto max-w-6xl">
+        <header class="text-center mb-12">
+            <h1 id="animatedTitle" class="text-4xl font-bold mb-2"></h1>
+            <p class="text-xl text-gray-400">Your Gateway to Tech Opportunities</p>
+        </header>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Job Search Card -->
+            <div class="card rounded-xl overflow-hidden gradient-border">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-14 h-14 mr-4 flex items-center justify-center icon-container rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-semibold">Find Jobs</h2>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Explore top-tier opportunities in software development, web programming, and tech industries.
+                    </p>
+                    <a href="https://cse.google.com/cse?cx=12897c337ccda441c" 
+                       target="_blank" 
+                       class="block text-center btn-primary text-white py-3 px-4 rounded-lg font-medium">
+                        Search Jobs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Learning Resources Card -->
+            <div class="card rounded-xl overflow-hidden gradient-border">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-14 h-14 mr-4 flex items-center justify-center icon-container rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-semibold">Learn & Grow</h2>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Access top-rated courses from Coursera, edX, freeCodeCamp, and other leading platforms.
+                    </p>
+                    <a href="/learn" 
+                       class="block text-center btn-primary text-white py-3 px-4 rounded-lg font-medium">
+                        Explore Courses
+                    </a>
+                </div>
+            </div>
+
+            <!-- Job Recommendation Card -->
+            <div class="card rounded-xl overflow-hidden gradient-border">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-14 h-14 mr-4 flex items-center justify-center icon-container rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-semibold">Job Match</h2>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Get personalized job recommendations based on your skills and experience.
+                    </p>
+                    <a href="/index" 
+                       class="block text-center btn-primary text-white py-3 px-4 rounded-lg font-medium">
+                        Get Recommendations
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-16 text-center text-gray-500">
+            <p style="color: white;">&copy; 2024 TechCareer Hub. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const title = "TechCareer Hub";
+            const titleElement = document.getElementById('animatedTitle');
+            
+            function animateTitle(index) {
+                if (index < title.length) {
+                    const span = document.createElement('span');
+                    span.className = 'animated-text';
+                    span.textContent = title[index];
+                    titleElement.appendChild(span);
+                    
+                    setTimeout(() => {
+                        span.classList.add('visible');
+                        animateTitle(index + 1);
+                    }, 100);
+                }
+            }
+            
+            animateTitle(0);
+        });
+    </script>
+</body>
+</html>

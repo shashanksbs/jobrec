@@ -1,0 +1,202 @@
+[
+    {
+        "job_title": "Cloud Solutions Architect",
+        "company_name": "Cloud Innovators",
+        "location": "Houston, TX",
+        "job_description": "Design cloud solutions for business needs, primarily on AWS and Azure platforms.",
+        "experience_years": 7,
+        "working_hours": "Full-Time",
+        "salary": 13, 
+        "skills": ["Cloud Architecture", "AWS", "Azure", "DevOps", "CI/CD"]
+    },
+    {
+        "job_title": "Software Engineer",
+        "company_name": "Tech Giants",
+        "location": "San Francisco, CA",
+        "job_description": "Develop software solutions and maintain large-scale applications.",
+        "experience_years": 3,
+        "working_hours": "Full-Time",
+        "salary": 12,  
+        "skills": ["Python", "Django", "REST APIs", "JavaScript", "React", "AWS"]
+    },
+    {
+        "job_title": "Data Scientist",
+        "company_name": "AI Labs",
+        "location": "New York, NY",
+        "job_description": "Work on cutting-edge data science solutions, including machine learning models for big data.",
+        "experience_years": 4,
+        "working_hours": "Full-Time",
+        "salary": 11.5,
+        "skills": ["Machine Learning", "Python", "TensorFlow", "Keras", "Data Analysis", "AWS"]
+    },
+    {
+        "job_title": "DevOps Engineer",
+        "company_name": "DevOps Experts",
+        "location": "Seattle, WA",
+        "job_description": "Implement and maintain CI/CD pipelines, infrastructure as code, and cloud deployments.",
+        "experience_years": 5,
+        "working_hours": "Full-Time",
+        "salary": 11,  
+        "skills": ["CI/CD", "AWS", "Azure", "Docker", "Kubernetes", "Infrastructure as Code", "Terraform"]
+    },
+    {
+        "job_title": "Full Stack Developer",
+        "company_name": "Innovative Web Solutions",
+        "location": "Austin, TX",
+        "job_description": "Develop both frontend and backend solutions for web applications.",
+        "experience_years": 4,
+        "working_hours": "Full-Time",
+        "salary": 10,  
+        "skills": ["JavaScript", "Node.js", "React", "MongoDB", "SQL", "AWS", "HTML/CSS"]
+    },
+    {
+        "job_title": "Junior Software Developer",
+        "company_name": "Startup Hub",
+        "location": "Remote",
+        "job_description": "Assist in developing software solutions and writing clean code.",
+        "experience_years": 0,
+        "working_hours": "Full-Time",
+        "salary": 6,  
+        "skills": ["Java", "Spring", "REST APIs", "Git", "HTML/CSS"]
+    },
+    {
+        "job_title": "Intern Data Analyst",
+        "company_name": "Data Solutions",
+        "location": "Chicago, IL",
+        "job_description": "Analyze data sets and assist in developing reports and dashboards.",
+        "experience_years": 0,
+        "working_hours": "Part-Time",
+        "salary": 4.5,  
+        "skills": ["Excel", "SQL", "Data Visualization", "Python"]
+    },
+    {
+        "job_title": "Fresh Graduate - Marketing Assistant",
+        "company_name": "Creative Marketing Co.",
+        "location": "Los Angeles, CA",
+        "job_description": "Support the marketing team with campaigns, events, and analytics.",
+        "experience_years": 0,
+        "working_hours": "Internship",
+        "salary": 3,
+        "skills": ["Digital Marketing", "Social Media", "SEO", "Content Creation"]
+    },
+    {
+        "job_title": "Web Developer Intern",
+        "company_name": "Web Solutions Inc.",
+        "location": "Miami, FL",
+        "job_description": "Learn and contribute to web development projects.",
+        "experience_years": 0,
+        "working_hours": "Internship",
+        "salary": 4,  
+        "skills": ["HTML", "CSS", "JavaScript", "React"]
+    },
+    {
+        "job_title": "Systems Administrator",
+        "company_name": "Network Pros",
+        "location": "Boston, MA",
+        "job_description": "Manage and maintain IT infrastructure and systems.",
+        "experience_years": 2,
+        "working_hours": "Full-Time",
+        "salary": 9,  
+        "skills": ["Windows Server", "Linux", "Networking", "VMware"]
+    },
+    {
+        "job_title": "Product Manager",
+        "company_name": "Tech Innovations",
+        "location": "San Jose, CA",
+        "job_description": "Lead product development from concept to launch, collaborating with cross-functional teams.",
+        "experience_years": 5,
+        "working_hours": "Full-Time",
+        "salary": 12,  
+        "skills": ["Product Development", "Agile", "Stakeholder Management", "Market Research"]
+    },
+    {
+        "job_title": "Human Resources Manager",
+        "company_name": "People Solutions Inc.",
+        "location": "Denver, CO",
+        "job_description": "Oversee recruitment, employee relations, and HR policies to support organizational goals.",
+        "experience_years": 6,
+        "working_hours": "Full-Time",
+        "salary": 10, 
+        "skills": ["Recruitment", "Employee Relations", "Performance Management", "HR Policies"]
+    },
+    {
+        "job_title": "Call Center Representative",
+        "company_name": "Customer Care Solutions",
+        "location": "Orlando, FL",
+        "job_description": "Provide exceptional customer service by answering queries and resolving issues via phone.",
+        "experience_years": 0,
+        "working_hours": "Full-Time",
+        "salary": 4,
+        "skills": ["Customer Service", "Communication Skills", "Problem Solving", "Teamwork"]
+    },
+    {
+        "job_title": "Sales Executive",
+        "company_name": "Sales Force Co.",
+        "location": "Chicago, IL",
+        "job_description": "Drive sales by developing customer relationships and providing tailored solutions.",
+        "experience_years": 2,
+        "working_hours": "Full-Time",
+        "salary": 7,  
+        "skills": ["Sales Strategy", "Negotiation", "Communication", "CRM Software"]
+    },
+    {
+        "job_title": "Digital Marketing Specialist",
+        "company_name": "Marketing Mavericks",
+        "location": "Austin, TX",
+        "job_description": "Create and manage online marketing campaigns to increase brand awareness and sales.",
+        "experience_years": 3,
+        "working_hours": "Full-Time",
+        "salary": 9,  
+        "skills": ["SEO", "Google Analytics", "Social Media Marketing", "Content Marketing"]
+    },
+    {
+        "job_title": "Business Analyst",
+        "company_name": "Data Insights Ltd.",
+        "location": "New York, NY",
+        "job_description": "Analyze business needs and provide insights to improve operations and efficiency.",
+        "experience_years": 4,
+        "working_hours": "Full-Time",
+        "salary": 11,
+        "skills": ["Data Analysis", "Business Intelligence", "SQL", "Project Management"]
+    },
+    {
+        "job_title": "UI/UX Designer",
+        "company_name": "Creative Designs",
+        "location": "Seattle, WA",
+        "job_description": "Design user-friendly interfaces and experiences for web and mobile applications.",
+        "experience_years": 3,
+        "working_hours": "Full-Time",
+        "salary": 10.5,  
+        "skills": ["UI Design", "UX Research", "Adobe XD", "Prototyping"]
+    },
+    {
+        "job_title": "Content Writer",
+        "company_name": "Content Creators",
+        "location": "Los Angeles, CA",
+        "job_description": "Create engaging content for blogs, websites, and social media to drive traffic and engagement.",
+        "experience_years": 2,
+        "working_hours": "Full-Time",
+        "salary": 5,  
+        "skills": ["Writing", "SEO", "Research", "Editing"]
+    },
+    {
+        "job_title": "Quality Assurance Tester",
+        "company_name": "Tech Quality Group",
+        "location": "San Francisco, CA",
+        "job_description": "Ensure software quality by performing testing and identifying bugs before release.",
+        "experience_years": 3,
+        "working_hours": "Full-Time",
+        "salary": 8, 
+        "skills": ["QA Testing", "Automation", "Selenium", "Bug Tracking"]
+    },
+    {
+        "job_title": "Customer Support Specialist",
+        "company_name": "Support Stars",
+        "location": "Houston, TX",
+        "job_description": "Assist customers via chat and email to resolve issues and provide product information.",
+        "experience_years": 1,
+        "working_hours": "Full-Time",
+        "salary": 4.5, 
+        "skills": ["Customer Support", "Communication", "Problem Solving", "Technical Skills"]
+    }
+]

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Coding Courses Video Previews</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .video-preview {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: center;
+        }
+        .video-preview iframe {
+            width: 100%;
+            height: 250px;
+            border-radius: 8px;
+        }
+        .video-preview h2 {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .video-preview p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1> Online Coding Course recommendation</h1>
+    
+    <div id="video-container" class="video-grid">
+        <!-- Videos will be dynamically inserted here -->
+    </div>
+
+    <script>
+        const videos = [
+            {
+                title: "How I Learned to Code in 4 Months & Got a Job!",
+                creator: "Tim Kim",
+                videoId: "WR1ydijTx5E"
+            },
+            {
+                title: "Top 5 Programming Courses",
+                creator: "Sahil & Sarra",
+                videoId: "mmVaKcM_vrw"
+            },
+            {
+                title: "I tried 50 Programming Courses. Here are Top 5.",
+                creator: "Sahil & Sarra",
+                videoId: "dqlO6_5rZSQ"
+            },
+            {
+                title: "Harvard's Free Coding Courses",
+                creator: "Python Programmer",
+                videoId: "WwEcPcfRlD0"
+            },
+            {
+                title: "How To Learn Programming for BEGINNERS!",
+                creator: "CroatCode",
+                videoId: "bJzb-RuUcMU"
+            },
+            {
+                title: "Introduction to Programming and Computer Science",
+                creator: "freeCodeCamp.org",
+                videoId: "zOjov-2OZ0E"
+            },
+            {
+                title: "So You Want to Learn How to Program",
+                creator: "Academically",
+                videoId: "9npuvAGHB7c"
+            },
+            {
+                title: "Learning Data Science with Python",
+                creator: "Dragonfly Statistics",
+                videoId: "g2rCNwK1p6g"
+            },
+            {
+                title: "Python for Everybody - Full University Python Course",
+                creator: "freeCodeCamp.org",
+                videoId: "8DvywoWv6fI"
+            },
+            {
+                title: "IBM Data Science Professional Certificate",
+                creator: "Coursera",
+                videoId: "ZstzwKbHdUA"
+            }
+        ];
+
+        function getRandomVideos(count) {
+            // Create a copy of the videos array and shuffle it
+            const shuffledVideos = [...videos].sort(() => 0.5 - Math.random());
+            return shuffledVideos.slice(0, count);
+        }
+
+        function renderVideos() {
+            const videoContainer = document.getElementById('video-container');
+            const selectedVideos = getRandomVideos(4);
+
+            videoContainer.innerHTML = selectedVideos.map(video => `
+                <div class="video-preview">
+                    <iframe 
+                        src="https://www.youtube.com/embed/${video.videoId}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                    ></iframe>
+                    <h2>${video.title}</h2>
+                    <p>By ${video.creator}</p>
+                </div>
+            `).join('');
+        }
+
+        // Render videos on page load and when refreshed
+        document.addEventListener('DOMContentLoaded', renderVideos);
+    </script>
+</body>
+</html>
