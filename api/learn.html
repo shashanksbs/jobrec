@@ -2,48 +2,184 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Online Coding Courses Video Previews</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Coding Course Recommendations</title>
     <style>
+        /* CSS Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Variables */
+        :root {
+            --primary-color: #0a66c2;
+            --secondary-color: #f5f5f5;
+            --background-color: #1c1e21;
+            --card-background: #ffffff;
+            --text-color: #ffffff;
+            --text-dark: #000000;
+            --text-secondary: #5e5e5e;
+            --transition-speed: 0.3s;
+        }
+
+        /* Base Styles */
         body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1128px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f4;
         }
+
+        /* Animated Background */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #1c1e21, #2c3e50);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        /* Video Grid Styles */
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
+
         .video-preview {
-            background-color: white;
+            background-color: var(--card-background);
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 15px;
-            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
         }
+
+        .video-preview:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
         .video-preview iframe {
             width: 100%;
-            height: 250px;
-            border-radius: 8px;
+            aspect-ratio: 16 / 9;
+            border: none;
         }
-        .video-preview h2 {
-            margin: 10px 0;
-            font-size: 16px;
+
+        .video-info {
+            padding: 1rem;
         }
-        .video-preview p {
-            color: #666;
-            margin-bottom: 10px;
+
+        .video-info h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            max-height: 2.4em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+        }
+
+        .video-info p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Button Styles */
+        .refresh-button {
+            display: block;
+            margin: 2rem auto;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .refresh-button:hover {
+            background-color: #004182;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <h1> Online Coding Course recommendation</h1>
-    
-    <div id="video-container" class="video-grid">
-        <!-- Videos will be dynamically inserted here -->
-    </div>
+    <div class="animated-background"></div>
+    <header>
+        <div class="container">
+            <h1 style="text-align: center;">Course Recommendations <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-stars" viewBox="0 0 16 16">
+                <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
+              </svg></h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="video-container" class="video-grid">
+            <!-- Videos will be dynamically inserted here -->
+        </div>
+        <button id="refresh-button" class="refresh-button">Discover More Courses</button>
+    </main>
 
     <script>
         const videos = [
@@ -96,35 +232,64 @@
                 title: "IBM Data Science Professional Certificate",
                 creator: "Coursera",
                 videoId: "ZstzwKbHdUA"
+            },
+            {
+                title: "Learn JavaScript - Full Course for Beginners",
+                creator: "freeCodeCamp.org",
+                videoId: "PkZNo7MFNFg"
+            },
+            {
+                title: "Web Development In 2023 - A Practical Guide",
+                creator: "Traversy Media",
+                videoId: "u72H_zZzkcw"
+            },
+            {
+                title: "React Course - Beginner's Tutorial for React JavaScript Library [2022]",
+                creator: "freeCodeCamp.org",
+                videoId: "bMknfKXIFA8"
+            },
+            {
+                title: "Git and GitHub for Beginners - Crash Course",
+                creator: "freeCodeCamp.org",
+                videoId: "RGOj5yH7evk"
+            },
+            {
+                title: "Data Structures and Algorithms in Python - Full Course for Beginners",
+                creator: "freeCodeCamp.org",
+                videoId: "pkYVOmU3MgA"
             }
         ];
 
         function getRandomVideos(count) {
-            // Create a copy of the videos array and shuffle it
             const shuffledVideos = [...videos].sort(() => 0.5 - Math.random());
             return shuffledVideos.slice(0, count);
         }
 
         function renderVideos() {
             const videoContainer = document.getElementById('video-container');
-            const selectedVideos = getRandomVideos(4);
+            const selectedVideos = getRandomVideos(6);
 
             videoContainer.innerHTML = selectedVideos.map(video => `
-                <div class="video-preview">
+                <div class="video-preview fade-in">
                     <iframe 
                         src="https://www.youtube.com/embed/${video.videoId}" 
-                        frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen
                     ></iframe>
-                    <h2>${video.title}</h2>
-                    <p>By ${video.creator}</p>
+                    <div class="video-info">
+                        <h2>${video.title}</h2>
+                        <p>By ${video.creator}</p>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // Render videos on page load and when refreshed
+        // Render videos on page load
         document.addEventListener('DOMContentLoaded', renderVideos);
+
+        // Add event listener for refresh button
+        document.getElementById('refresh-button').addEventListener('click', renderVideos);
     </script>
 </body>
 </html>
+
