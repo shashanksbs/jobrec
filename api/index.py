@@ -158,5 +158,15 @@ def generate_job_search_url(skills):
         "job_types": job_types
     }
 
+@app.route('/')
+def home():
+    return send_file('dashboard.html')
+
+@app.route('/<page>')
+def render_page(page):
+    if page in ['resume', 'learn']:
+        return send_file(f'{page}.html')
+    return "Page not found", 404
+    
 if __name__ == '__main__':
     app.run(debug=True)
