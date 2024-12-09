@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, send_file, request
 from flask_cors import CORS
 import PyPDF2
+import os
 import json
 import re
 import urllib.parse
@@ -16,12 +17,13 @@ def load_json_file(file_name):
 def load_jobs():
     return load_json_file("jobs.json")
 
-def extract_skills_from_pdf(file):
+def extract_skills_from_pdf(file_path):
     skills = []
-    reader = PyPDF2.PdfReader(file)
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text() + "\n"
+    with open(file_path, 'rb') as file:
+        reader = PyPDF2.PdfReader(file)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
 
     lines = text.splitlines()
     skills_section_found = False
@@ -47,16 +49,66 @@ def tokenize(text):
 
 @app.route('/')
 def home():
-    return "Welcome to the Job Skill Extractor API!"
+    return send_file('dashboard.html')
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
+@app.route('/<page>')
+def render_page(page):
+    if page in ['resume', 'learn']:
+        return send_file(f'{page}.html')
+    return "Page not found", 404
+
+def generate_job_search_url(skills):
+    # Generate job search URL based on skills
+    technical_keywords = ['javascript', 'node.js', 'react', 'mongodb', 'python', 'java', 'c', 'c++', 'html', 'css', 'backend', 'frontend', 'fullstack', 'web development', 'programming', 'software', 'devops', 'sql']
+    non_technical_keywords = ['management', 'sales', 'marketing', 'hr', 'customer service', 'administrative', 'communication', 'creative', 'business']
+    
+    is_technical = any(skill.lower() in technical_keywords for skill in skills)
+    
+    base_url = "https://www.google.com/search"
+    
+    if is_technical:
+        job_types = [
+            "fullstack developer jobs",
+            "backend developer jobs", 
+            "devops jobs",
+            "software engineer jobs",
+            "web developer jobs"
+        ]
+        apply_button = True
+    else:
+        job_types = [
+            "general office jobs",
+            "sales jobs", 
+            "customer service jobs",
+            "administrative jobs", 
+            "creative jobs"
+        ]
+        apply_button = False
+    
+    search_params = {
+        "q": " OR ".join(job_types),
+        "udm": "8",
+        "sa": "X"
+    }
+    
+    return {
+        "job_search_url": f"{base_url}?{urllib.parse.urlencode(search_params)}",
+        "apply_button": apply_button,
+        "job_types": job_types
+    }
+
+@app.route('/extract_skills', methods=['POST'])
+def extract_skills():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['file']
-    skills_text = extract_skills_from_pdf(file)
+    print(f"File uploaded: {file.filename}")  # Debug log
+    file_path = os.path.join('uploads', file.filename)
+    file.save(file_path)
 
+    skills_text = extract_skills_from_pdf(file_path)
+    
     extracted_tokens = set()
     for skill in skills_text:
         extracted_tokens.update(tokenize(skill))  
@@ -92,81 +144,16 @@ def upload_file():
     # Generate job search URL and apply button flag
     job_search_info = generate_job_search_url(skills_text)
 
+    os.remove(file_path)
+
     return jsonify({
         'jobs': recommended_jobs,
         'job_search_url': job_search_info['job_search_url'],
         'show_apply_button': job_search_info['apply_button']
     })
 
-def generate_job_search_url(skills):
-    """
-    Generate job search URL based on skills.
-    
-    Args:
-        skills (list): List of skills extracted from the resume
-    
-    Returns:
-        dict: Job search details
-    """
-    # Technical skill keywords
-    technical_keywords = [
-        'javascript', 'node.js', 'react', 'mongodb', 'python', 'java', 
-        'c', 'c++', 'html', 'css', 'backend', 'frontend', 'fullstack', 
-        'web development', 'programming', 'software', 'devops', 'sql'
-    ]
-    
-    # Non-technical skill keywords
-    non_technical_keywords = [
-        'management', 'sales', 'marketing', 'hr', 'customer service', 
-        'administrative', 'communication', 'creative', 'business'
-    ]
-    
-    # Check skill types
-    is_technical = any(skill.lower() in technical_keywords for skill in skills)
-    
-    # Prepare search parameters
-    base_url = "https://www.google.com/search"
-    
-    if is_technical:
-        job_types = [
-            "fullstack developer jobs",
-            "backend developer jobs", 
-            "devops jobs",
-            "software engineer jobs",
-            "web developer jobs"
-        ]
-        apply_button = True
-    else:
-        job_types = [
-            "general office jobs",
-            "sales jobs", 
-            "customer service jobs",
-            "administrative jobs", 
-            "creative jobs"
-        ]
-        apply_button = False
-    
-    search_params = {
-        "q": " OR ".join(job_types),
-        "udm": "8",
-        "sa": "X"
-    }
-    
-    return {
-        "job_search_url": f"{base_url}?{urllib.parse.urlencode(search_params)}",
-        "apply_button": apply_button,
-        "job_types": job_types
-    }
-
-@app.route('/')
-def home():
-    return send_file('dashboard.html')
-
-@app.route('/<page>')
-def render_page(page):
-    if page in ['resume', 'learn']:
-        return send_file(f'{page}.html')
-    return "Page not found", 404
-    
 if __name__ == '__main__':
+    if not os.path.exists('uploads'):
+        os.makedirs('uploads')
+        
     app.run(debug=True)
