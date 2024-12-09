@@ -5,6 +5,7 @@ import os
 import json
 import re
 import urllib.parse
+import google.generativeai as genai
 
 app = Flask(__name__)
 CORS(app)
@@ -53,7 +54,7 @@ def home():
 
 @app.route('/<page>')
 def render_page(page):
-    if page in ['resume', 'learn']:
+    if page in ['resume', 'learn', 'chat']:
         return send_file(f'{page}.html')
     return "Page not found", 404
 
@@ -155,5 +156,39 @@ def extract_skills():
 if __name__ == '__main__':
     if not os.path.exists('uploads'):
         os.makedirs('uploads')
+
+genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
+model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.json.get('message', '')
+    
+    # Customize prompt for job-related context
+    job_context = """
+    You are a professional job assistant. Provide helpful, concise, and 
+    professional advice about job searching, resume writing, interview preparation, 
+    career development, and workplace skills. Tailor your responses to be 
+    constructive and supportive.
+    
+    User's query:
+    """
+    
+    full_prompt = job_context + user_message
+    
+    try:
+        # Generate response using Gemini
+        response = model.generate_content(full_prompt)
         
+        return jsonify({
+            'status': 'success', 
+            'message': response.text
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'status': 'error', 
+            'message': str(e)
+        })
+
     app.run(debug=True)
