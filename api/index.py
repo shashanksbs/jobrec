@@ -1,9 +1,9 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, jsonify, send_file
 from flask_cors import CORS
 import PyPDF2
 import os
 import json
-import re  
+import re
 import urllib.parse
 
 app = Flask(__name__)
@@ -117,9 +117,9 @@ def generate_job_search_url(skills):
         "apply_button": apply_button,
         "job_types": job_types
     }
-# Update upload_file route to use the new return value
-@app.route('/upload', methods=['POST'])
-def upload_file():
+
+@app.route('/extract_skills', methods=['POST'])
+def extract_skills():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
 
