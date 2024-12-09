@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_file
+from flask import Flask, jsonify, send_file, redirect, url_for
 from flask_cors import CORS
 import PyPDF2
 import os
@@ -57,6 +57,10 @@ def render_page(page):
         return send_file(f'{page}.html')
     return "Page not found", 404
 
+@app.route('/favicon.ico')
+def favicon():
+    # Serve the favicon, return a blank response to avoid the 404 error
+    return redirect(url_for('static', filename='favicon.ico'))
 
 def generate_job_search_url(skills):
     """
