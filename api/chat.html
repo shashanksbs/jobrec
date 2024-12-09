@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Assistant Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #chatContainer {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .chat-message {
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: #d1e7ff;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 10px;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 10px;
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 30px;
+            outline: none;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .send-button {
+            background-color: #4c6ef5;
+            padding: 15px;
+            color: white;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .send-button:hover {
+            background-color: #3a55d5;
+        }
+
+        .loading-message {
+            color: #888;
+            text-align: center;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="container mx-auto max-w-2xl p-4">
+        <div class="bg-white shadow-lg rounded-lg">
+            <div id="chatHeader" class="bg-blue-500 text-white p-4 rounded-t-lg">
+                <h2 class="text-xl font-bold">Job Assistant Chatbot</h2>
+            </div>
+            
+            <div id="chatContainer" class="chat-container">
+                <div class="text-center text-gray-500">
+                    Start a conversation about jobs, careers, or professional development.
+                </div>
+            </div>
+
+            <div class="p-4 border-t">
+                <div class="chat-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="userInput" 
+                        placeholder="Ask your job-related question..."
+                        class="chat-input"
+                    >
+                    <button 
+                        type="submit" 
+                        class="send-button"
+                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
+                        <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                      </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelector('.send-button').addEventListener('click', async () => {
+            const userInput = document.getElementById('userInput');
+            const chatContainer = document.getElementById('chatContainer');
+            
+            if (!userInput.value.trim()) return; // Don't send empty messages
+
+            // Display user message
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('user-message');
+            userMessageDiv.innerHTML = `
+                ${userInput.value}
+            `;
+            chatContainer.appendChild(userMessageDiv);
+            
+            // Show loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('loading-message');
+            loadingDiv.innerHTML = 'Generating response...';
+            chatContainer.appendChild(loadingDiv);
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userInput.value })
+                });
+                
+                const data = await response.json();
+                
+                // Remove loading indicator
+                chatContainer.removeChild(loadingDiv);
+                
+                // Display AI response
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.classList.add('bot-message');
+                if (data.status === 'success') {
+                    botMessageDiv.innerHTML = data.message;
+                } else {
+                    botMessageDiv.innerHTML = `
+                        <span class="error-message">Error generating response. Please try again.</span>
+                    `;
+                }
+                chatContainer.appendChild(botMessageDiv);
+                
+                // Clear input field and scroll to bottom
+                userInput.value = '';
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (error) {
+                console.error('Chat error:', error);
+                
+                // Remove loading indicator
+                if (loadingDiv.parentNode) {
+                    chatContainer.removeChild(loadingDiv);
+                }
+                
+                // Display error message
+                const errorDiv = document.createElement('div');
+                errorDiv.classList.add('bot-message');
+                errorDiv.innerHTML = `
+                    <span class="error-message">An error occurred. Please try again later.</span>
+                `;
+                chatContainer.appendChild(errorDiv);
+            }
+        });
+
+        // Handle "Enter" key for sending messages
+        document.getElementById('userInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.querySelector('.send-button').click();
+            }
+        });
+    </script>
+</body>
+
+</html>
