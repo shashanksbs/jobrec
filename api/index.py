@@ -1,7 +1,6 @@
-from flask import Flask, jsonify, send_file
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import PyPDF2
-import os
 import json
 import re
 import urllib.parse
@@ -48,13 +47,56 @@ def tokenize(text):
 
 @app.route('/')
 def home():
-    return send_file('dashboard.html')
+    return "Welcome to the Job Skill Extractor API!"
 
-@app.route('/<page>')
-def render_page(page):
-    if page in ['resume', 'learn']:
-        return send_file(f'{page}.html')
-    return "Page not found", 404
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+
+    file = request.files['file']
+    skills_text = extract_skills_from_pdf(file)
+
+    extracted_tokens = set()
+    for skill in skills_text:
+        extracted_tokens.update(tokenize(skill))  
+
+    job_listings = load_jobs()
+
+    recommended_jobs = []
+    
+    for job in job_listings:
+        job_tokens = set()
+        
+        job_tokens.update(tokenize(job.get('job_title', '')))
+        job_tokens.update(tokenize(job.get('job_description', '')))
+        job_tokens.update(tokenize(job.get('experience_level', '')))
+        job_tokens.update(tokenize(job.get('location', '')))
+        job_tokens.update(tokenize(job.get('company_name', '')))
+        
+        for skill in job.get('skills', []):
+            job_tokens.update(tokenize(skill))
+        
+        matched_tokens = extracted_tokens.intersection(job_tokens)
+
+        if matched_tokens:  
+            match_percentage = round((len(matched_tokens) / len(job_tokens)) * 100, 2)  
+            recommended_jobs.append({
+                "job": job,
+                "match_percentage": match_percentage,
+                "matched_tokens": list(matched_tokens)  
+            })
+
+    recommended_jobs.sort(key=lambda x: x['match_percentage'], reverse=True)
+
+    # Generate job search URL and apply button flag
+    job_search_info = generate_job_search_url(skills_text)
+
+    return jsonify({
+        'jobs': recommended_jobs,
+        'job_search_url': job_search_info['job_search_url'],
+        'show_apply_button': job_search_info['apply_button']
+    })
 
 def generate_job_search_url(skills):
     """
@@ -115,55 +157,6 @@ def generate_job_search_url(skills):
         "apply_button": apply_button,
         "job_types": job_types
     }
-
-@app.route('/extract_skills', methods=['POST'])
-def extract_skills():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-
-    file = request.files['file']
-    skills_text = extract_skills_from_pdf(file)
-
-    extracted_tokens = set()
-    for skill in skills_text:
-        extracted_tokens.update(tokenize(skill))  
-
-    job_listings = load_jobs()
-
-    recommended_jobs = []
-    
-    for job in job_listings:
-        job_tokens = set()
-        
-        job_tokens.update(tokenize(job.get('job_title', '')))
-        job_tokens.update(tokenize(job.get('job_description', '')))
-        job_tokens.update(tokenize(job.get('experience_level', '')))
-        job_tokens.update(tokenize(job.get('location', '')))
-        job_tokens.update(tokenize(job.get('company_name', '')))
-        
-        for skill in job.get('skills', []):
-            job_tokens.update(tokenize(skill))
-        
-        matched_tokens = extracted_tokens.intersection(job_tokens)
-
-        if matched_tokens:  
-            match_percentage = round((len(matched_tokens) / len(job_tokens)) * 100, 2)  
-            recommended_jobs.append({
-                "job": job,
-                "match_percentage": match_percentage,
-                "matched_tokens": list(matched_tokens)  
-            })
-
-    recommended_jobs.sort(key=lambda x: x['match_percentage'], reverse=True)
-
-    # Generate job search URL and apply button flag
-    job_search_info = generate_job_search_url(skills_text)
-
-    return jsonify({
-        'jobs': recommended_jobs,
-        'job_search_url': job_search_info['job_search_url'],
-        'show_apply_button': job_search_info['apply_button']
-    })
 
 if __name__ == '__main__':
     app.run(debug=True)
