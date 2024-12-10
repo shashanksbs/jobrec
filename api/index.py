@@ -105,6 +105,9 @@ def extract_skills():
         'job_search_url': job_search_info['job_search_url'],
         'show_apply_button': job_search_info['apply_button']
     })
+app.route('/')
+def home():
+    return send_file('dashboard.html')
 
 @app.route('/<page>')
 def render_page(page):
