@@ -11,10 +11,6 @@ import google.generativeai as genai
 app = Flask(__name__)
 CORS(app)
 
-# Create a 'static' folder in the project root directory to store static assets like the favicon
-if not os.path.exists('static'):
-    os.makedirs('static')
-
 def load_json_file(file_name):
     file_path = os.path.join(os.path.dirname(__file__), file_name)
     with open(file_path, "r") as file:
