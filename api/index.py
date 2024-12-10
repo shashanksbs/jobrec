@@ -6,6 +6,7 @@ import PyPDF2
 import re
 import urllib.parse
 import google.generativeai as genai
+import os  # Make sure you import os module for file paths
 
 app = Flask(__name__)
 CORS(app)
@@ -105,7 +106,8 @@ def extract_skills():
         'job_search_url': job_search_info['job_search_url'],
         'show_apply_button': job_search_info['apply_button']
     })
-app.route('/')
+
+@app.route('/')
 def home():
     return send_file('dashboard.html')
 
