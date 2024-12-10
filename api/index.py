@@ -1,15 +1,19 @@
 import io
-from flask import Flask, jsonify, send_file, request
+import os
+from flask import Flask, jsonify, send_file, request, send_from_directory
 from flask_cors import CORS
 import json
 import PyPDF2
 import re
 import urllib.parse
 import google.generativeai as genai
-import os  # Make sure you import os module for file paths
 
 app = Flask(__name__)
 CORS(app)
+
+# Create a 'static' folder in the project root directory to store static assets like the favicon
+if not os.path.exists('static'):
+    os.makedirs('static')
 
 def load_json_file(file_name):
     file_path = os.path.join(os.path.dirname(__file__), file_name)
@@ -118,8 +122,15 @@ def render_page(page):
         return send_file(f'{page}.html')
     return "Page not found", 404
 
+# Route to serve favicon.ico from the static folder
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico')
+
 if __name__ == '__main__':
+    # Make sure to replace this API key with your own valid key
     genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
     model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
+    # Running the app
     app.run(debug=True)
