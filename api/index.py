@@ -1,15 +1,50 @@
-from flask import Flask, jsonify, send_file, request
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import PyPDF2
 import os
 import json
-import re
+import re  
 import urllib.parse
 import google.generativeai as genai
+
 
 app = Flask(__name__)
 CORS(app)
 
+genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
+model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.json.get('message', '')
+    
+    # Customize prompt for job-related context
+    job_context = """
+    You are a professional job assistant. Provide helpful, concise, and 
+    professional advice about job searching, resume writing, interview preparation, 
+    career development, and workplace skills. Tailor your responses to be 
+    constructive and supportive.
+    
+    User's query:
+    """
+    
+    full_prompt = job_context + user_message
+    
+    try:
+        # Generate response using Gemini
+        response = model.generate_content(full_prompt)
+        
+        return jsonify({
+            'status': 'success', 
+            'message': response.text
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'status': 'error', 
+            'message': str(e)
+        })
+    
 def load_json_file(file_name):
     file_path = os.path.join(os.path.dirname(__file__), file_name)
     with open(file_path, "r") as file:
@@ -48,6 +83,7 @@ def tokenize(text):
     tokens = re.findall(r'\b\w+\b', text.lower())
     return tokens
 
+
 @app.route('/')
 def home():
     return send_file('dashboard.html')
@@ -57,14 +93,37 @@ def render_page(page):
     if page in ['resume', 'learn', 'chat']:
         return send_file(f'{page}.html')
     return "Page not found", 404
+@app.route('/')
+def index():
+    return send_file('index.html')
 
 def generate_job_search_url(skills):
-    # Generate job search URL based on skills
-    technical_keywords = ['javascript', 'node.js', 'react', 'mongodb', 'python', 'java', 'c', 'c++', 'html', 'css', 'backend', 'frontend', 'fullstack', 'web development', 'programming', 'software', 'devops', 'sql']
-    non_technical_keywords = ['management', 'sales', 'marketing', 'hr', 'customer service', 'administrative', 'communication', 'creative', 'business']
+    """
+    Generate job search URL based on skills.
     
+    Args:
+        skills (list): List of skills extracted from the resume
+    
+    Returns:
+        dict: Job search details
+    """
+    # Technical skill keywords
+    technical_keywords = [
+        'javascript', 'node.js', 'react', 'mongodb', 'python', 'java', 
+        'c', 'c++', 'html', 'css', 'backend', 'frontend', 'fullstack', 
+        'web development', 'programming', 'software', 'devops', 'sql'
+    ]
+    
+    # Non-technical skill keywords
+    non_technical_keywords = [
+        'management', 'sales', 'marketing', 'hr', 'customer service', 
+        'administrative', 'communication', 'creative', 'business'
+    ]
+    
+    # Check skill types
     is_technical = any(skill.lower() in technical_keywords for skill in skills)
     
+    # Prepare search parameters
     base_url = "https://www.google.com/search"
     
     if is_technical:
@@ -97,14 +156,13 @@ def generate_job_search_url(skills):
         "apply_button": apply_button,
         "job_types": job_types
     }
-
-@app.route('/extract_skills', methods=['POST'])
-def extract_skills():
+# Update upload_file route to use the new return value
+@app.route('/upload', methods=['POST'])
+def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['file']
-    print(f"File uploaded: {file.filename}")  # Debug log
     file_path = os.path.join('uploads', file.filename)
     file.save(file_path)
 
@@ -156,39 +214,5 @@ def extract_skills():
 if __name__ == '__main__':
     if not os.path.exists('uploads'):
         os.makedirs('uploads')
-
-genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
-model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-
-@app.route('/chat', methods=['POST'])
-def chat():
-    user_message = request.json.get('message', '')
-    
-    # Customize prompt for job-related context
-    job_context = """
-    You are a professional job assistant. Provide helpful, concise, and 
-    professional advice about job searching, resume writing, interview preparation, 
-    career development, and workplace skills. Tailor your responses to be 
-    constructive and supportive.
-    
-    User's query:
-    """
-    
-    full_prompt = job_context + user_message
-    
-    try:
-        # Generate response using Gemini
-        response = model.generate_content(full_prompt)
         
-        return jsonify({
-            'status': 'success', 
-            'message': response.text
-        })
-    
-    except Exception as e:
-        return jsonify({
-            'status': 'error', 
-            'message': str(e)
-        })
-
-    app.run(debug=True)
+app.run(debug=True)
