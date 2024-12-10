@@ -1,7 +1,3 @@
-Log in
-
-Sign up
-You said:
 from flask import Flask, jsonify, send_file, request
 from flask_cors import CORS
 import PyPDF2
