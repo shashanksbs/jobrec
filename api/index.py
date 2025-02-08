@@ -1,118 +1,132 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import PyPDF2
+import io
 import os
 import json
-import re  
+import re
 import urllib.parse
 import google.generativeai as genai
 
 app = Flask(__name__)
 CORS(app)
 
-# Configure the API key (ideally load this from an environment variable)
-genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
+# Configure the Generative AI API key (ideally via an environment variable)
+genai.configure(api_key="YOUR_API_KEY")
 
-# Option 1: Directly call generate_text when needed
-# Option 2: If you prefer a model instance, you might consider wrapping it—but here we use generate_text directly.
 
+# --------------------- Chat Endpoint --------------------- #
 @app.route('/chat', methods=['POST'])
 def chat():
+    """
+    Receives a user message, adds a job-assistant context, and returns a generated response.
+    """
     data = request.get_json()
     if not data or 'message' not in data:
         return jsonify({'status': 'error', 'message': 'No message provided'}), 400
 
     user_message = data['message']
 
-    # Customize prompt for job-related context
+    # Job-assistant context prompt
     job_context = (
         "You are a professional job assistant. Provide helpful, concise, and professional advice about "
         "job searching, resume writing, interview preparation, career development, and workplace skills. "
         "Tailor your responses to be constructive and supportive.\n\nUser's query:\n"
     )
-
     full_prompt = job_context + user_message
 
     try:
-        # Generate a response using the updated generate_text method
+        # Generate text using the Gemini model. Adjust parameters (like temperature)
+        # as needed.
         response = genai.generate_text(
             model="gemini-1.5-flash",
             prompt=full_prompt
-            # You can include additional parameters such as temperature or max_output_tokens if needed.
         )
-
         return jsonify({
             'status': 'success',
-            'message': response.result  # Use the proper attribute from the response object
+            'message': response.result  # Using the proper attribute from the response object
         })
     except Exception as e:
-        # Log the exception for debugging
         print("Error generating response:", e)
         return jsonify({
             'status': 'error',
             'message': "Error generating response. Please try again."
         }), 500
 
-# The rest of your endpoints remain unchanged
 
+# --------------------- Helper Functions --------------------- #
 def load_json_file(file_name):
+    """
+    Loads a JSON file from the same directory.
+    """
     file_path = os.path.join(os.path.dirname(__file__), file_name)
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         return json.load(file)
 
+
 def load_jobs():
+    """
+    Loads job listings from 'jobs.json'.
+    """
     return load_json_file("jobs.json")
 
-def extract_skills_from_pdf(file_path):
+
+def extract_skills_from_pdf(file_stream):
+    """
+    Extracts skills from a PDF file-like object.
+    
+    Args:
+        file_stream (BytesIO): In-memory file stream of the PDF.
+        
+    Returns:
+        list: A list of skill strings.
+    """
     skills = []
-    with open(file_path, 'rb') as file:
-        reader = PyPDF2.PdfReader(file)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() + "\n"
+    reader = PyPDF2.PdfReader(file_stream)
+    text = ""
+    for page in reader.pages:
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text + "\n"
 
     lines = text.splitlines()
     skills_section_found = False
 
     for line in lines:
         line = line.strip()
-        
-        if 'skills' in line.lower(): 
+        # Identify the skills section (case-insensitive)
+        if 'skills' in line.lower():
             skills_section_found = True
             continue
 
-        if skills_section_found and line: 
-            skills.extend([skill.strip() for skill in line.split(',')])
-        
-        if not line and skills_section_found:
+        if skills_section_found and line:
+            # Expecting skills to be comma-separated
+            skills.extend([skill.strip() for skill in line.split(',') if skill.strip()])
+
+        # Stop if an empty line is found after the skills section starts
+        if skills_section_found and not line:
             break
 
-    return skills  
+    return skills
+
 
 def tokenize(text):
+    """
+    Tokenizes text into lowercase alphanumeric tokens.
+    """
     tokens = re.findall(r'\b\w+\b', text.lower())
     return tokens
 
-@app.route('/')
-def home():
-    # You might want to consolidate duplicate '/' routes.
-    return send_file('index.html')
-
-@app.route('/<page>')
-def render_page(page):
-    if page in ['resume', 'learn', 'chat']:
-        return send_file(f'{page}.html')
-    return "Page not found", 404
 
 def generate_job_search_url(skills):
     """
-    Generate job search URL based on skills.
+    Generates a Google job search URL based on the list of skills.
     
     Args:
-        skills (list): List of skills extracted from the resume
-    
+        skills (list): List of skills extracted from the resume.
+        
     Returns:
-        dict: Job search details
+        dict: Contains the job search URL, a flag for an apply button, and job types.
     """
     # Technical skill keywords
     technical_keywords = [
@@ -127,10 +141,10 @@ def generate_job_search_url(skills):
         'administrative', 'communication', 'creative', 'business'
     ]
     
-    # Check skill types
+    # Determine if any extracted skill is technical
     is_technical = any(skill.lower() in technical_keywords for skill in skills)
     
-    # Prepare search parameters
+    # Base URL for Google search
     base_url = "https://www.google.com/search"
     
     if is_technical:
@@ -164,53 +178,61 @@ def generate_job_search_url(skills):
         "job_types": job_types
     }
 
+
+# --------------------- File Upload & Job Recommendation --------------------- #
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    """
+    Accepts a PDF file upload, extracts skills, compares them against job listings,
+    and returns recommended jobs along with a generated job search URL.
+    """
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['file']
-    file_path = os.path.join('uploads', file.filename)
-    file.save(file_path)
 
-    skills_text = extract_skills_from_pdf(file_path)
-    
+    # Read the uploaded file into memory (as a BytesIO stream)
+    file_stream = io.BytesIO(file.read())
+
+    # Extract skills from the PDF
+    skills_text = extract_skills_from_pdf(file_stream)
+
     extracted_tokens = set()
     for skill in skills_text:
-        extracted_tokens.update(tokenize(skill))  
+        extracted_tokens.update(tokenize(skill))
 
+    # Load job listings from jobs.json
     job_listings = load_jobs()
-
     recommended_jobs = []
-    
+
     for job in job_listings:
         job_tokens = set()
-        
         job_tokens.update(tokenize(job.get('job_title', '')))
         job_tokens.update(tokenize(job.get('job_description', '')))
         job_tokens.update(tokenize(job.get('experience_level', '')))
         job_tokens.update(tokenize(job.get('location', '')))
         job_tokens.update(tokenize(job.get('company_name', '')))
-        
+
         for skill in job.get('skills', []):
             job_tokens.update(tokenize(skill))
-        
+
+        # Determine matching tokens between extracted skills and job description tokens
         matched_tokens = extracted_tokens.intersection(job_tokens)
 
-        if matched_tokens:  
-            match_percentage = round((len(matched_tokens) / len(job_tokens)) * 100, 2)  
+        if matched_tokens:
+            # Calculate match percentage based on token overlap
+            match_percentage = round((len(matched_tokens) / len(job_tokens)) * 100, 2)
             recommended_jobs.append({
                 "job": job,
                 "match_percentage": match_percentage,
-                "matched_tokens": list(matched_tokens)  
+                "matched_tokens": list(matched_tokens)
             })
 
+    # Sort jobs by descending match percentage
     recommended_jobs.sort(key=lambda x: x['match_percentage'], reverse=True)
 
-    # Generate job search URL and apply button flag
+    # Generate a job search URL based on the extracted skills
     job_search_info = generate_job_search_url(skills_text)
-
-    os.remove(file_path)
 
     return jsonify({
         'jobs': recommended_jobs,
@@ -218,8 +240,28 @@ def upload_file():
         'show_apply_button': job_search_info['apply_button']
     })
 
+
+# --------------------- Static Page Routes --------------------- #
+@app.route('/')
+def index():
+    """
+    Serves the main index page.
+    """
+    return send_file('dashboard.html')
+
+
+@app.route('/<page>')
+def render_page(page):
+    """
+    Serves specific pages if they are allowed.
+    """
+    # Define a set of allowed pages (without the .html extension)
+    allowed_pages = {'resume', 'learn', 'chat'}
+    if page in allowed_pages:
+        return send_file(f'{page}.html')
+    return "Page not found", 404
+
+
+# --------------------- Main Entry --------------------- #
 if __name__ == '__main__':
-    if not os.path.exists('uploads'):
-        os.makedirs('uploads')
-        
     app.run(debug=True)
