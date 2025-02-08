@@ -7,44 +7,47 @@ import re
 import urllib.parse
 import google.generativeai as genai
 
-
 app = Flask(__name__)
 CORS(app)
 
+# Configure the API key (ideally load this from an environment variable)
 genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
-model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_message = request.json.get('message', '')
-    
+    data = request.get_json()
+    if not data or 'message' not in data:
+        return jsonify({'status': 'error', 'message': 'No message provided'}), 400
+
+    user_message = data['message']
+
     # Customize prompt for job-related context
-    job_context = """
-    You are a professional job assistant. Provide helpful, concise, and 
-    professional advice about job searching, resume writing, interview preparation, 
-    career development, and workplace skills. Tailor your responses to be 
-    constructive and supportive.
-    
-    User's query:
-    """
-    
+    job_context = (
+        "You are a professional job assistant. Provide helpful, concise, and professional advice about "
+        "job searching, resume writing, interview preparation, career development, and workplace skills. "
+        "Tailor your responses to be constructive and supportive.\n\nUser's query:\n"
+    )
+
     full_prompt = job_context + user_message
-    
+
     try:
-        # Generate response using Gemini
-        response = model.generate_content(full_prompt)
-        
+        # Generate a response using the updated generate_text method
+        response = genai.generate_text(
+            model="gemini-1.5-flash",
+            prompt=full_prompt
+        )
+
         return jsonify({
-            'status': 'success', 
-            'message': response.text
+            'status': 'success',
+            'message': response.result
         })
-    
     except Exception as e:
+        print("Error generating response:", e)
         return jsonify({
-            'status': 'error', 
-            'message': str(e)
-        })
-    
+            'status': 'error',
+            'message': "Error generating response. Please try again."
+        }), 500
+
 def load_json_file(file_name):
     file_path = os.path.join(os.path.dirname(__file__), file_name)
     with open(file_path, "r") as file:
@@ -83,19 +86,15 @@ def tokenize(text):
     tokens = re.findall(r'\b\w+\b', text.lower())
     return tokens
 
-
 @app.route('/')
 def home():
-    return send_file('dashboard.html')
+    return send_file('index.html')
 
 @app.route('/<page>')
 def render_page(page):
     if page in ['resume', 'learn', 'chat']:
         return send_file(f'{page}.html')
     return "Page not found", 404
-@app.route('/')
-def index():
-    return send_file('index.html')
 
 def generate_job_search_url(skills):
     """
@@ -120,10 +119,8 @@ def generate_job_search_url(skills):
         'administrative', 'communication', 'creative', 'business'
     ]
     
-    # Check skill types
     is_technical = any(skill.lower() in technical_keywords for skill in skills)
     
-    # Prepare search parameters
     base_url = "https://www.google.com/search"
     
     if is_technical:
@@ -156,7 +153,7 @@ def generate_job_search_url(skills):
         "apply_button": apply_button,
         "job_types": job_types
     }
-# Update upload_file route to use the new return value
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -195,7 +192,7 @@ def upload_file():
             recommended_jobs.append({
                 "job": job,
                 "match_percentage": match_percentage,
-                "matched_tokens": list(matched_tokens)  
+                "matched_tokens": list(matched_tokens)
             })
 
     recommended_jobs.sort(key=lambda x: x['match_percentage'], reverse=True)
@@ -212,8 +209,4 @@ def upload_file():
     })
 
 if __name__ == '__main__':
-    if not os.path.exists('uploads'):
-        os.makedirs('uploads')
-        
     app.run(debug=True)
-
