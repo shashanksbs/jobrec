@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Configure the Generative AI API key (ideally via an environment variable)
-genai.configure(api_key="YOUR_API_KEY")
+genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
 
 
 # --------------------- Chat Endpoint --------------------- #
