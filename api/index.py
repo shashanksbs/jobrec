@@ -13,6 +13,9 @@ CORS(app)
 # Configure the API key (ideally load this from an environment variable)
 genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
 
+# Option 1: Directly call generate_text when needed
+# Option 2: If you prefer a model instance, you might consider wrapping it—but here we use generate_text directly.
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
@@ -35,18 +38,22 @@ def chat():
         response = genai.generate_text(
             model="gemini-1.5-flash",
             prompt=full_prompt
+            # You can include additional parameters such as temperature or max_output_tokens if needed.
         )
 
         return jsonify({
             'status': 'success',
-            'message': response.result
+            'message': response.result  # Use the proper attribute from the response object
         })
     except Exception as e:
+        # Log the exception for debugging
         print("Error generating response:", e)
         return jsonify({
             'status': 'error',
             'message': "Error generating response. Please try again."
         }), 500
+
+# The rest of your endpoints remain unchanged
 
 def load_json_file(file_name):
     file_path = os.path.join(os.path.dirname(__file__), file_name)
@@ -88,6 +95,7 @@ def tokenize(text):
 
 @app.route('/')
 def home():
+    # You might want to consolidate duplicate '/' routes.
     return send_file('index.html')
 
 @app.route('/<page>')
@@ -119,8 +127,10 @@ def generate_job_search_url(skills):
         'administrative', 'communication', 'creative', 'business'
     ]
     
+    # Check skill types
     is_technical = any(skill.lower() in technical_keywords for skill in skills)
     
+    # Prepare search parameters
     base_url = "https://www.google.com/search"
     
     if is_technical:
@@ -192,7 +202,7 @@ def upload_file():
             recommended_jobs.append({
                 "job": job,
                 "match_percentage": match_percentage,
-                "matched_tokens": list(matched_tokens)
+                "matched_tokens": list(matched_tokens)  
             })
 
     recommended_jobs.sort(key=lambda x: x['match_percentage'], reverse=True)
@@ -209,4 +219,7 @@ def upload_file():
     })
 
 if __name__ == '__main__':
+    if not os.path.exists('uploads'):
+        os.makedirs('uploads')
+        
     app.run(debug=True)
