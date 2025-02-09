@@ -15,7 +15,6 @@ CORS(app)
 genai.configure(api_key="AIzaSyBADqoFQCnC5njtkGrEciTyzSug9hRck9A")
 
 
-# --------------------- Chat Endpoint --------------------- #
 @app.route('/chat', methods=['POST'])
 def chat():
     """
@@ -36,18 +35,25 @@ def chat():
     full_prompt = job_context + user_message
 
     try:
-        # Generate text using the Gemini model. Adjust parameters (like temperature)
-        # as needed.
-        response = genai.generate_text(
-            model="gemini-1.5-flash",
-            prompt=full_prompt
-        )
+        # Initialize the model with gemini-1.5-flash
+        model = genai.GenerativeModel(model_name="gemini-2.0-flash")
+        
+        # Generate response
+        response = model.generate_content(full_prompt)
+        
+        # Check if response was blocked
+        if response.prompt_feedback.block_reason:
+            return jsonify({
+                'status': 'error',
+                'message': "The response was blocked due to content safety restrictions."
+            }), 400
+            
         return jsonify({
             'status': 'success',
-            'message': response.result  # Using the proper attribute from the response object
+            'message': response.text
         })
     except Exception as e:
-        print("Error generating response:", e)
+        print("Error generating response:", str(e))
         return jsonify({
             'status': 'error',
             'message': "Error generating response. Please try again."
@@ -179,7 +185,6 @@ def generate_job_search_url(skills):
     }
 
 
-# --------------------- File Upload & Job Recommendation --------------------- #
 @app.route('/upload', methods=['POST'])
 def upload_file():
     """
@@ -241,7 +246,6 @@ def upload_file():
     })
 
 
-# --------------------- Static Page Routes --------------------- #
 @app.route('/')
 def index():
     """
@@ -262,6 +266,5 @@ def render_page(page):
     return "Page not found", 404
 
 
-# --------------------- Main Entry --------------------- #
 if __name__ == '__main__':
     app.run(debug=True)
